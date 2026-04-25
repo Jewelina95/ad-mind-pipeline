@@ -1,0 +1,24 @@
+# Large sensor CSV data — regenerate with: python3 demo/01_generator_v2.py P0X
+data_v2/*/sensor/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log

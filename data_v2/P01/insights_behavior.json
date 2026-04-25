@@ -1,0 +1,59 @@
+{
+  "_note": "Demo 模式 — 手工高质量输出, 模拟 BehaviorAgent (Claude sonnet-4) 处理 EMA/BPSD/情境 facts。",
+  "patient_id": "P01",
+  "agent": "BehaviorAgent",
+  "input_facts_count": 12,
+  "kb_entries_used": 6,
+  "insights": [
+    {
+      "id": "ins_behavior_001",
+      "observation": "EMA 情绪 30 天单调下降 (6.3 → 2.0/10)",
+      "clinical_implication": "持续性情绪低落, 符合 AD 共病抑郁的典型曲线 (患病率 30-50%)",
+      "domain": "psychological",
+      "supporting_facts": ["F28_ema_mood_trend"],
+      "supporting_knowledge": ["BPSD_DEPRESSION_001"],
+      "confidence": 0.85,
+      "differential": "原发抑郁 vs AD 共病抑郁; PHQ-9 同步上升 (1.7→9.9) 强化共病可能"
+    },
+    {
+      "id": "ins_behavior_002",
+      "observation": "EMA 焦虑 30 天上升 (1.7 → 6.0/10, r=+0.93)",
+      "clinical_implication": "焦虑症状加重与 BPSD 焦虑亚型一致, 是激越发作的前驱症状",
+      "domain": "psychological",
+      "supporting_facts": ["F30_ema_anxiety_trend"],
+      "supporting_knowledge": ["BPSD_ANXIETY_001"],
+      "confidence": 0.82,
+      "differential": "广泛性焦虑障碍 vs AD-BPSD 焦虑"
+    },
+    {
+      "id": "ins_behavior_003",
+      "observation": "睡眠质量 EMA 评分下降 36%",
+      "clinical_implication": "睡眠紊乱在 AD 中患病率 82%, 需评估昼夜节律 (褪黑素分泌)",
+      "domain": "behavioral",
+      "supporting_facts": ["F29_ema_sleep_trend"],
+      "supporting_knowledge": ["BPSD_SLEEP_001"],
+      "confidence": 0.76,
+      "differential": "睡眠呼吸暂停? 不安腿综合征?"
+    },
+    {
+      "id": "ins_behavior_004",
+      "observation": "Day 24 出现 45 分钟徘徊事件, Day 28 出现 30 分钟激越事件",
+      "clinical_implication": "BPSD 事件已成模式, 需立即启动非药物干预防止恶化",
+      "domain": "behavioral",
+      "supporting_facts": ["bpsd_events.jsonl"],
+      "supporting_knowledge": ["BPSD_WANDERING_001", "BPSD_AGITATION_001"],
+      "confidence": 0.91,
+      "differential": ""
+    },
+    {
+      "id": "ins_behavior_005",
+      "observation": "EMA 精力 下降 30% 伴 hand_fine_motor 活动量上升",
+      "clinical_implication": "主观精力降但客观重复性手部动作增加, 提示无目的运动 (烦躁标志)",
+      "domain": "behavioral",
+      "supporting_facts": ["F31_ema_energy_trend", "F23_hand_fine_motor_svm_outlier"],
+      "supporting_knowledge": ["BPSD_AGITATION_001"],
+      "confidence": 0.74,
+      "differential": ""
+    }
+  ]
+}

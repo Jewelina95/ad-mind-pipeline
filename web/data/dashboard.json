@@ -1,0 +1,89 @@
+{
+  "_note": "Demo 模式 — Narrator 输出。综合 PhysioAgent + BehaviorAgent + ClinicalAgent 给出最终 Dashboard。",
+  "patient": "P01",
+  "report_day": 30,
+  "generated_at": "2026-04-25T13:30:00",
+  "alert_level": "yellow",
+  "summary_today": "MCI→mild_AD 倾向, 立即启动综合干预",
+
+  "medical_history": "68 岁男性, 教育 12 年, 认知储备中等 (0.85), 进展模式: 线性退化。无家族 AD 史记录。",
+  "session_recap": "Day 14 临床 Note: 主诉近期偶有忘事, MoCA 估计 24.5 分 (人群均值-3.0)。建议家属记录变化, 3 月后复评。",
+
+  "patient_data_insights": [
+    {
+      "card_title": "认知-步态联合退化",
+      "card_md": "**步速 30 天持续下降至 0.78 m/s (基线 1.05)**, 双任务变异性升至 8.5% (基线 2.3%), 双任务代价显著。\n\n**符合 Buracchio 2010 描述的 AD 前驱期步速拐点 + Verghese 2013 MCR (运动认知衰退综合征) 预诊断标准。**",
+      "alert": "yellow",
+      "linked_insights": ["ins_physio_001", "ins_physio_002"],
+      "linked_charts": ["chart_gait_speed", "chart_dtc"]
+    },
+    {
+      "card_title": "情绪-自主神经协同恶化",
+      "card_md": "**PHQ-9 抑郁分由 1.7 升至 9.9 (mild→moderate 抑郁), EMA 情绪 30 天单调下降 (6.3→2.0/10)**, 同期 HRV 下降 28%, EDA 反应性峰值 z=+9.6。\n\n**情绪 + 自主神经 + EDA 三模态同向恶化, 与 AD 共病抑郁 (患病率 30-50%) + BPSD 焦虑 (前驱症状) 一致。**",
+      "alert": "yellow",
+      "linked_insights": ["ins_behavior_001", "ins_behavior_002", "ins_physio_003", "ins_physio_004"],
+      "linked_charts": ["chart_phq9_mood", "chart_hrv"]
+    },
+    {
+      "card_title": "BPSD 事件已成模式",
+      "card_md": "**Day 24 出现 45 分钟徘徊事件, Day 28 出现 30 分钟激越事件**。两次发作均在午后 (13:00, 14:00), 与日落综合征前置时段一致。\n\n**BPSD 事件已成模式, 必须立即启动非药物干预防止恶化。同时激活手套 GPS 追踪 + 家属预警。**",
+      "alert": "red",
+      "linked_insights": ["ins_behavior_004"],
+      "linked_charts": ["chart_bpsd_timeline"]
+    },
+    {
+      "card_title": "ClinicalAgent 综合判断",
+      "card_md": "**MCI → mild_AD 倾向 (置信度 0.78)**。MMSE 30 → 11.2 (4 周, 速率异常); MoCA 同期降幅小, 提示评估工具差异; 多模态指标趋势一致。\n\n**强烈建议**: (1) 转诊 **血液 p-tau217** 检测确认 AD 病理; (2) **头颅 MRI** 排除血管性病变; (3) 立即启动 **音乐疗法 + 认知训练 + 睡眠卫生 + GPS 安全监控**。",
+      "alert": "yellow",
+      "linked_insights": ["ins_clinical_overall"],
+      "linked_charts": []
+    }
+  ],
+
+  "interventions_today": [
+    {"type": "music_therapy", "urgency": "this_week", "rationale": "EMA mood 持续下降 + EDA 反应性高"},
+    {"type": "cognitive_training", "urgency": "this_week", "rationale": "MMSE 大幅下降"},
+    {"type": "sleep_hygiene", "urgency": "this_week", "rationale": "EMA 睡眠下降"},
+    {"type": "safety_monitoring", "urgency": "now", "rationale": "已发生 45 分钟徘徊"}
+  ],
+
+  "differential_concern": [
+    "AD vs 路易体痴呆 (DLB)",
+    "AD vs 血管性痴呆 (VaD)",
+    "原发抑郁 vs AD 共病抑郁"
+  ],
+
+  "charts": [
+    {
+      "id": "chart_gait_speed",
+      "type": "line_with_threshold",
+      "title": "步速 30 天轨迹",
+      "x_axis": "day",
+      "y_axis": "gait_speed (m/s)",
+      "data_source": "P01/sensor/walking_normal_dayXX.csv",
+      "annotations": [
+        {"type": "hline", "value": 1.05, "label": "基线 Day 0", "color": "blue"},
+        {"type": "hline", "value": 0.80, "label": "Verghese MCR 阈值", "color": "red", "style": "dashed"}
+      ]
+    },
+    {
+      "id": "chart_phq9_mood",
+      "type": "dual_line",
+      "title": "情绪与抑郁同步轨迹",
+      "x_axis": "day",
+      "series": [
+        {"name": "EMA mood (左轴)", "color": "green"},
+        {"name": "PHQ-9 (右轴, 反向)", "color": "red"}
+      ]
+    },
+    {
+      "id": "chart_bpsd_timeline",
+      "type": "event_timeline",
+      "title": "BPSD 事件时间线",
+      "events": [
+        {"day": 24, "hour": 13, "type": "wandering", "duration_min": 45, "color": "orange"},
+        {"day": 28, "hour": 14, "type": "agitation", "duration_min": 30, "color": "red"}
+      ]
+    }
+  ]
+}

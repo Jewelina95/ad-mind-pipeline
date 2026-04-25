@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Method · AD MIND Pipeline</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="./" class="nav-brand">
+      <span class="nav-brand-mark">M</span>
+      AD MIND Pipeline
+    </a>
+    <div class="nav-links">
+      <a href="./">Overview</a>
+      <a href="method.html" class="active">Method</a>
+      <a href="example.html">P01 Live Demo</a>
+      <a href="https://jewelina95.github.io/ad-synthetic-generator/">Generator ↗</a>
+      <a href="https://github.com/Jewelina95/ad-mind-pipeline">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" style="padding: 80px 0 40px;">
+  <div class="container">
+    <span class="hero-tag">Method · 4 layers</span>
+    <h1>Pipeline 四层架构详解</h1>
+    <p class="hero-sub">每一层的输入 / 输出 / 关键代码 / prompt 设计。所有判断都可追溯到 fact 和 knowledge。</p>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+
+    <!-- Flow diagram -->
+    <div class="eyebrow">Pipeline Flow</div>
+    <h2 class="section-title">数据怎么流</h2>
+    <div class="flow-diagram">
+DATA LAYER (输入)                     KNOWLEDGE LAYER
+─────────────────                     ──────────────────
+generator v2.1 (sensor/EMA/量表/     knowledge/*.json (35 条)
+notes/BPSD events)                    ↑文献 + 李医生采访固化
+real baseline (4 受试者)              ↑evidence level + PMID
+        │                                     │
+        ▼                                     │
+   ┌─────────────────────────────────┐        │
+   │ ANALYZER (无 LLM, 纯统计 + 模板) │        │
+   │ • outlier (z-score)             │        │
+   │ • trend (linregress 30 天)      │        │
+   │ • comparison (前后对比)          │        │
+   │ • difference (双任务代价 DTC)    │        │
+   │ • extreme (极值 + 跨模态签名)    │        │
+   └──────────────┬──────────────────┘        │
+                  │ DataFact[]                │
+                  │ (template_text + z + p)   │
+                  ▼                           │
+   ┌─────────────────────────────────┐        │
+   │ KNOWLEDGE ROUTER                │◀───────┤
+   │ fact tags → kb.query()          │        │
+   │ 不全量推送, 按需检索             │        │
+   └──────────────┬──────────────────┘        │
+                  │ knowledge_text             │
+                  ▼                           │
+   ┌─────────────────────────────────┐        │
+   │ PHYSIO AGENT (LLM 1)            │◀───────┤
+   │ 接 IMU/PPG/EDA fact + KB        │        │
+   │ → biological insight[]          │        │
+   └──────────────┬──────────────────┘        │
+                  │                           │
+   ┌──────────────┼──────────────────┐        │
+   │ BEHAVIOR AGENT (LLM 2, 并发)    │◀───────┤
+   │ 接 EMA/活动/EDA fact + KB       │        │
+   │ → psychological/behavioral ins  │        │
+   └──────────────┬──────────────────┘        │
+                  │                           │
+                  ▼                           │
+   ┌─────────────────────────────────┐        │
+   │ CLINICAL AGENT (LLM 3, 串行)    │◀───────┘
+   │ 接前两位 insight + 量表 + notes │
+   │ → 分期 + 鉴别 + 干预 + 转诊     │
+   └──────────────┬──────────────────┘
+                  │ insight[] (含 supporting_facts + knowledge_ids)
+                  ▼
+   ┌─────────────────────────────────┐
+   │ NARRATOR (LLM 4)                │
+   │ Threader + Card Render +        │
+   │ Chart Spec → Dashboard          │
+   └──────────────┬──────────────────┘
+                  ▼
+        医生版报告 + 家属版简报 + 图表 JSON
+    </div>
+  </div>
+</section>
+
+<!-- Layer 1: Analyzer -->
+<section class="section-tight">
+  <div class="container">
+
+    <div class="layer-section">
+      <div class="layer-tag">Layer 1 · Statistical</div>
+      <h3>Analyzer — 把原始数据变成"医生能读的事实"</h3>
+      <p>不调 LLM。读 generator 的 30 天多模态 CSV + 健康参考范围, 跑 5 类统计检测, 输出 <code>DataFact[]</code>。</p>
+
+      <div class="io-block">
+        <div>
+          <h5>输入</h5>
+          <ul style="margin:0;padding-left:18px;color:var(--text-dim)">
+            <li><code>data_v2/P01/sensor/*.csv</code> (4 任务 × 30 天 = 120 文件)</li>
+            <li><code>data_v2/P01/ema.jsonl</code> (90 条 EMA)</li>
+            <li><code>data_v2/P01/surveys.jsonl</code> (5 周量表)</li>
+            <li><code>data/baseline 4.8/normal_reference_ranges.csv</code></li>
+          </ul>
+        </div>
+        <div>
+          <h5>输出 (P01 实跑)</h5>
+          <ul style="margin:0;padding-left:18px;color:var(--text-dim)">
+            <li><strong>34 条</strong> DataFact</li>
+            <li>类型: outlier 8 / trend 22 / comparison 3 / difference 1</li>
+            <li>模态: imu 12 / ppg 6 / eda 6 / ema 4 / survey 3 / audio 3</li>
+          </ul>
+        </div>
+      </div>
+
+      <h5 style="margin-top:18px;font-size:0.78rem;text-transform:uppercase;color:var(--text-dim);letter-spacing:0.10em">5 类 Fact 检测公式</h5>
+      <pre><code># Outlier
+z = (current - baseline_mean) / baseline_sd
+if abs(z) > 2.0: → "异常 (升/降)至 X (基线 Y±Z, z=±N)"
+
+# Trend (30 天)
+slope, _, r, p, _ = linregress(days, values)
+if p < 0.05 and abs(r) > 0.3: → "X 在过去 N 天呈 (升/降) 趋势"
+
+# Comparison (前后对比)
+pct = (m2 - m1) / m1 * 100
+if abs(pct) > 10: → "X 由 m1 变为 m2 (Δ=±%)"
+
+# Difference (双任务代价 DTC)
+dtc = (single - dual) / single * 100
+if dtc > 20: → "双任务代价 N% (单任务 X, 双任务 Y)"
+
+# Extreme (跨模态签名)
+if EDA↑ + HR↑ + IMU↑ at same timestamp:
+    → "cross_modal_signature: sundowning/agitation"</code></pre>
+
+      <p style="margin-top:14px;font-size:0.88rem;color:var(--text-dim)">
+        <strong>关键设计</strong>: Analyzer 是确定性的, 同样输入永远同样 fact。所有定量计算都在这一层完成, LLM 永远拿到的是"已计算好的事实"。
+      </p>
+    </div>
+
+    <!-- Layer 2: KnowledgeStore -->
+    <div class="layer-section">
+      <div class="layer-tag">Layer 2 · Retrieval</div>
+      <h3>KnowledgeStore — 文献/采访固化的可检索专家库</h3>
+      <p>35 条 JSON 知识条目, 涵盖 GDS 分期 + 4 模态传感器标志物 + BPSD 七症状 + MCR + 步态常模 + 药物。每条带 <code>evidence.level (A-D)</code> + PMID。</p>
+
+      <div class="io-block">
+        <div>
+          <h5>知识结构</h5>
+          <pre style="font-size:0.78rem"><code>{
+  "id": "BPSD_SUNDOWNING_001",
+  "category": "bpsd",
+  "modality": ["eda","ppg","imu"],
+  "applicable_stages": ["mci","mild_ad","moderate_ad"],
+  "clinical": {
+    "prevalence": "20-45%",
+    "features": "下午 4-6 点症状加重"
+  },
+  "detection": {
+    "sensor_signature": "EDA + HR 渐进性升高",
+    "thresholds": {"time_window": "16:00-18:00"}
+  },
+  "intervention": {
+    "first_line": "光照治疗"
+  },
+  "evidence": {
+    "level": "C",
+    "sources": [{"citation": "Canevelli 2016", "pmid": "..."}]
+  }
+}</code></pre>
+        </div>
+        <div>
+          <h5>路由规则</h5>
+          <pre style="font-size:0.78rem"><code># 按 fact 决定查什么
+for fact in facts:
+    if fact.modality == "imu":
+        kb.query(modality="imu",
+                 category="sensor")
+    if fact.pattern == "sundowning":
+        kb.query_bpsd("mci")
+    if patient.stage:
+        kb.query_staging(stage)
+
+# 返回 markdown 块
+# 拼到 Agent prompt</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 3: Agents -->
+    <div class="layer-section">
+      <div class="layer-tag">Layer 3 · LLM Synthesis</div>
+      <h3>三个 LLM Agent — 把事实和知识结合成临床洞察</h3>
+
+      <div class="grid-3" style="margin-top:18px">
+        <div class="card">
+          <h3 style="color:var(--accent)">PhysioAgent</h3>
+          <p style="font-size:0.85rem">接 IMU / PPG / EDA / Audio 的传感器 fact + 模态相关知识 → 输出 <code>biological insight</code> (步态 / HRV / 自主神经)。</p>
+          <p style="font-size:0.78rem;color:var(--text-faint)">≈ 神经内科 + 康复 + 言语治疗师</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--accent)">BehaviorAgent</h3>
+          <p style="font-size:0.85rem">接 EMA / 活动模式 / EDA 反应性 / BPSD 事件 fact + BPSD 知识 → 输出 <code>psychological / behavioral insight</code>。负责信号消歧 (HR↑ 是激越还是运动?)。</p>
+          <p style="font-size:0.78rem;color:var(--text-faint)">≈ 精神科 + 行为分析师</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--accent)">ClinicalAgent</h3>
+          <p style="font-size:0.85rem">不接原始 fact, 只接前两位 insight + 量表 + clinical note → 输出 <strong>分期倾向 + 鉴别诊断 + 干预优先级 + 转诊建议</strong>。</p>
+          <p style="font-size:0.78rem;color:var(--text-faint)">≈ MDT 主持的高年资神经科医生</p>
+        </div>
+      </div>
+
+      <h5 style="margin-top:22px;font-size:0.78rem;text-transform:uppercase;color:var(--text-dim);letter-spacing:0.10em">每条 Insight 的强制结构</h5>
+      <pre><code>{
+  "id": "ins_physio_001",
+  "observation": "客观传感器观察 (≤30字)",
+  "clinical_implication": "临床含义 (≤50字, 必须基于 KB)",
+  "domain": "biological|psychological|behavioral",
+  "supporting_facts": ["F03", "F05"],          ← 强制引用 fact_id
+  "supporting_knowledge": ["SENSOR_IMU_001"],  ← 强制引用 KB id
+  "confidence": 0.0-1.0,
+  "differential": "需鉴别的项 (如有)"
+}</code></pre>
+
+      <p style="margin-top:14px;font-size:0.88rem;color:var(--text-dim)">
+        <strong>关键设计</strong>: 每条 insight 必须列出 <code>supporting_facts</code> + <code>supporting_knowledge</code>。这让医生可以反查任意结论 → 找到原始数值和文献依据。Agent 不许虚构数字 (system_prompt 强制), 不许引用未提供的知识。
+      </p>
+    </div>
+
+    <!-- Layer 4: Narrator -->
+    <div class="layer-section">
+      <div class="layer-tag">Layer 4 · Narrative</div>
+      <h3>Narrator — 把 insight 变成医生 / 家属能读的叙事 + 图表</h3>
+      <p>Threader 按 alert + confidence 排序 → Insight Card 用两段式 (观察 + 加粗的临床含义) 渲染 → Chart Spec 自动生成 Recharts JSON 配置。</p>
+
+      <div class="io-block">
+        <div>
+          <h5>Insight Card 模板 (MIND L1)</h5>
+          <pre style="font-size:0.82rem"><code>## 步态衰退轨迹
+
+步速在过去 21 天持续下降，
+从 1.05 m/s 降至 0.82 m/s，
+接近 Verghese MCR 阈值 (0.8 m/s)。
+
+**这是 AD 前驱期最典型的步速拐点表现，
+与海马-前额叶环路早期受累一致
+(Buracchio 2010)。**</code></pre>
+        </div>
+        <div>
+          <h5>Chart Spec 自动生成</h5>
+          <pre style="font-size:0.82rem"><code>{
+  "id": "chart_001",
+  "linked_insight": "ins_physio_002",
+  "type": "line",
+  "data": [
+    {"day": 0,  "speed": 1.05},
+    {"day": 30, "speed": 0.78}
+  ],
+  "annotations": [
+    {"type":"hline", "value":0.95,
+     "label":"baseline"},
+    {"type":"hline", "value":0.80,
+     "label":"MCR threshold",
+     "style":"dashed-red"}
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="eyebrow">Cost & Latency</div>
+    <h2 class="section-title">实跑成本与时延</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>每次评估时延</h3>
+        <p>
+          T+0       Analyzer (无 LLM): <strong>~2 s</strong><br>
+          T+2.5s    PhysioAgent + BehaviorAgent (并发): <strong>~4 s</strong><br>
+          T+6.5s    ClinicalAgent (串行): <strong>~4 s</strong><br>
+          T+10s     Narrator: <strong>~3 s</strong><br>
+          <strong>总计 ~13 秒</strong>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Token 与成本</h3>
+        <p>
+          4 次 LLM 调用, 平均每次 1500 input + 500 output<br>
+          ≈ <strong>6000 input + 2000 output</strong> per evaluation<br>
+          sonnet-4: ~$0.025 / 次<br>
+          每周 1 次稳定期评估 → <strong>~$1.3 / 月 / 患者</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>AD MIND Pipeline · <a href="example.html">→ 看 P01 真实跑通的输出</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

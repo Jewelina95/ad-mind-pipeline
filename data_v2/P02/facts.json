@@ -1,0 +1,398 @@
+[
+  {
+    "fact_type": "trend",
+    "entity": "SVM 变异 (步态稳定性)@walking_normal",
+    "modality": "imu",
+    "template_text": "[walking_normal] SVM 变异 (步态稳定性) 在过去 30 天呈 上升 趋势 (2.70 → 3.09, r=0.71, p=0.000)",
+    "severity": 0.7078421175402401,
+    "evidence": {
+      "slope_per_day": 0.014615947747867253,
+      "r": 0.7078421175402401,
+      "p": 1.2134448300885786e-05,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 均值 (运动强度)@walking_normal",
+    "modality": "imu",
+    "template_text": "[walking_normal] SVM 均值 (运动强度) 在过去 30 天呈 上升 趋势 (10.39 → 10.43, r=0.76, p=0.000)",
+    "severity": 0.7617409562253854,
+    "evidence": {
+      "slope_per_day": 0.001869372171442745,
+      "r": 0.7617409562253854,
+      "p": 1.0106848589667001e-06,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "HR 均值@walking_normal",
+    "modality": "ppg",
+    "template_text": "[walking_normal] HR 均值 在过去 30 天呈 上升 趋势 (63.62 → 66.38, r=0.69, p=0.000)",
+    "severity": 0.6892863198237095,
+    "evidence": {
+      "slope_per_day": 0.14767778619748842,
+      "r": 0.6892863198237095,
+      "p": 2.524447864214216e-05,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "EDA 基线@walking_normal",
+    "modality": "eda",
+    "template_text": "[walking_normal] EDA 基线 在过去 30 天呈 下降 趋势 (1679.01 → 1368.72, r=-0.90, p=0.000)",
+    "severity": 0.9034346467839321,
+    "evidence": {
+      "slope_per_day": -13.73652632246325,
+      "r": -0.9034346467839321,
+      "p": 8.24921281697767e-12,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "EDA 变异@walking_normal",
+    "modality": "eda",
+    "template_text": "[walking_normal] EDA 变异 异常升高至 76.92 (基线 33.30±14.16, z=+3.1)",
+    "severity": 1.0,
+    "evidence": {
+      "current": 76.92347186771022,
+      "baseline_mean": 33.2967,
+      "baseline_sd": 14.158,
+      "z_score": 3.0814219429093246
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "SVM 变异 (步态稳定性)@walking_dual_task",
+    "modality": "imu",
+    "template_text": "[walking_dual_task] SVM 变异 (步态稳定性) 异常升高至 2.60 (基线 1.17±0.34, z=+4.2)",
+    "severity": 1.0,
+    "evidence": {
+      "current": 2.604648049810786,
+      "baseline_mean": 1.1676,
+      "baseline_sd": 0.345,
+      "z_score": 4.16535666611822
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 变异 (步态稳定性)@walking_dual_task",
+    "modality": "imu",
+    "template_text": "[walking_dual_task] SVM 变异 (步态稳定性) 在过去 30 天呈 上升 趋势 (1.54 → 2.94, r=0.41, p=0.026)",
+    "severity": 0.40600833936519054,
+    "evidence": {
+      "slope_per_day": 0.023220252382431097,
+      "r": 0.40600833936519054,
+      "p": 0.026001958397275163,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 均值 (运动强度)@walking_dual_task",
+    "modality": "imu",
+    "template_text": "[walking_dual_task] SVM 均值 (运动强度) 在过去 30 天呈 上升 趋势 (9.95 → 10.08, r=0.47, p=0.008)",
+    "severity": 0.47391752693969763,
+    "evidence": {
+      "slope_per_day": 0.0023536632712209613,
+      "r": 0.47391752693969763,
+      "p": 0.00815499430828869,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "HR 均值@walking_dual_task",
+    "modality": "ppg",
+    "template_text": "[walking_dual_task] HR 均值 在过去 30 天呈 上升 趋势 (78.96 → 81.69, r=0.79, p=0.000)",
+    "severity": 0.7897202282167078,
+    "evidence": {
+      "slope_per_day": 0.15236109629858055,
+      "r": 0.7897202282167078,
+      "p": 2.1223018657246296e-07,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "EDA 基线@walking_dual_task",
+    "modality": "eda",
+    "template_text": "[walking_dual_task] EDA 基线 在过去 30 天呈 下降 趋势 (1844.32 → 1503.66, r=-0.91, p=0.000)",
+    "severity": 0.9076192136957343,
+    "evidence": {
+      "slope_per_day": -15.227428382815722,
+      "r": -0.9076192136957343,
+      "p": 4.5557513006111215e-12,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "SVM 变异 (步态稳定性)@balance_standing",
+    "modality": "imu",
+    "template_text": "[balance_standing] SVM 变异 (步态稳定性) 异常升高至 1.73 (基线 0.12±0.09, z=+18.6)",
+    "severity": 1.0,
+    "evidence": {
+      "current": 1.7263053689167638,
+      "baseline_mean": 0.1178,
+      "baseline_sd": 0.0866,
+      "z_score": 18.573964999038843
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 变异 (步态稳定性)@balance_standing",
+    "modality": "imu",
+    "template_text": "[balance_standing] SVM 变异 (步态稳定性) 在过去 30 天呈 上升 趋势 (1.17 → 2.31, r=0.54, p=0.002)",
+    "severity": 0.5435580118918805,
+    "evidence": {
+      "slope_per_day": 0.033432583901262726,
+      "r": 0.5435580118918805,
+      "p": 0.0019066679836019635,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 均值 (运动强度)@balance_standing",
+    "modality": "imu",
+    "template_text": "[balance_standing] SVM 均值 (运动强度) 在过去 30 天呈 上升 趋势 (9.79 → 9.88, r=0.62, p=0.000)",
+    "severity": 0.6192895991349912,
+    "evidence": {
+      "slope_per_day": 0.0018161852715965216,
+      "r": 0.6192895991349912,
+      "p": 0.0002633680917202815,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "Jerk 变异 (步态平稳性)@balance_standing",
+    "modality": "imu",
+    "template_text": "[balance_standing] Jerk 变异 (步态平稳性) 异常升高至 0.17 (基线 0.06±0.03, z=+3.0)",
+    "severity": 1.0,
+    "evidence": {
+      "current": 0.16555086399861696,
+      "baseline_mean": 0.0605,
+      "baseline_sd": 0.0346,
+      "z_score": 3.0361521386883514
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "Jerk 变异 (步态平稳性)@balance_standing",
+    "modality": "imu",
+    "template_text": "[balance_standing] Jerk 变异 (步态平稳性) 在过去 30 天呈 上升 趋势 (0.07 → 0.16, r=0.80, p=0.000)",
+    "severity": 0.8012079873112178,
+    "evidence": {
+      "slope_per_day": 0.005309224768395207,
+      "r": 0.8012079873112178,
+      "p": 1.0434349804666465e-07,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "HR 均值@balance_standing",
+    "modality": "ppg",
+    "template_text": "[balance_standing] HR 均值 在过去 30 天呈 上升 趋势 (67.00 → 69.75, r=0.79, p=0.000)",
+    "severity": 0.7932468270471977,
+    "evidence": {
+      "slope_per_day": 0.1527436755228277,
+      "r": 0.7932468270471977,
+      "p": 1.714729919582808e-07,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "EDA 基线@balance_standing",
+    "modality": "eda",
+    "template_text": "[balance_standing] EDA 基线 在过去 30 天呈 下降 趋势 (1820.53 → 1483.30, r=-0.91, p=0.000)",
+    "severity": 0.9069686334940652,
+    "evidence": {
+      "slope_per_day": -15.003625396574753,
+      "r": -0.9069686334940652,
+      "p": 5.005431278135242e-12,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "SVM 变异 (步态稳定性)@hand_fine_motor",
+    "modality": "imu",
+    "template_text": "[hand_fine_motor] SVM 变异 (步态稳定性) 异常升高至 2.14 (基线 1.10±0.22, z=+4.7)",
+    "severity": 1.0,
+    "evidence": {
+      "current": 2.1380410360098456,
+      "baseline_mean": 1.0989,
+      "baseline_sd": 0.2219,
+      "z_score": 4.682924903153879
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 变异 (步态稳定性)@hand_fine_motor",
+    "modality": "imu",
+    "template_text": "[hand_fine_motor] SVM 变异 (步态稳定性) 在过去 30 天呈 上升 趋势 (2.22 → 2.02, r=0.54, p=0.002)",
+    "severity": 0.5448534659542619,
+    "evidence": {
+      "slope_per_day": 0.030627745562419397,
+      "r": 0.5448534659542619,
+      "p": 0.0018502734917955716,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "SVM 均值 (运动强度)@hand_fine_motor",
+    "modality": "imu",
+    "template_text": "[hand_fine_motor] SVM 均值 (运动强度) 异常升高至 10.02 (基线 9.90±0.06, z=+2.0)",
+    "severity": 0.6780772778426942,
+    "evidence": {
+      "current": 10.020277872295155,
+      "baseline_mean": 9.8968,
+      "baseline_sd": 0.0607,
+      "z_score": 2.0342318335280827
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "SVM 均值 (运动强度)@hand_fine_motor",
+    "modality": "imu",
+    "template_text": "[hand_fine_motor] SVM 均值 (运动强度) 在过去 30 天呈 上升 趋势 (10.02 → 10.01, r=0.60, p=0.000)",
+    "severity": 0.6015279545616242,
+    "evidence": {
+      "slope_per_day": 0.002622257173018976,
+      "r": 0.6015279545616242,
+      "p": 0.00043808749949938617,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "HR 均值@hand_fine_motor",
+    "modality": "ppg",
+    "template_text": "[hand_fine_motor] HR 均值 在过去 30 天呈 上升 趋势 (67.00 → 69.79, r=0.76, p=0.000)",
+    "severity": 0.7599476741570047,
+    "evidence": {
+      "slope_per_day": 0.15743853060821994,
+      "r": 0.7599476741570047,
+      "p": 1.1090016047142366e-06,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "EDA 基线@hand_fine_motor",
+    "modality": "eda",
+    "template_text": "[hand_fine_motor] EDA 基线 在过去 30 天呈 下降 趋势 (1913.18 → 1560.22, r=-0.89, p=0.000)",
+    "severity": 0.8947435104817462,
+    "evidence": {
+      "slope_per_day": -15.448786290953493,
+      "r": -0.8947435104817462,
+      "p": 2.6087747781365646e-11,
+      "n_days": 30
+    }
+  },
+  {
+    "fact_type": "outlier",
+    "entity": "EDA 变异@hand_fine_motor",
+    "modality": "eda",
+    "template_text": "[hand_fine_motor] EDA 变异 异常升高至 78.87 (基线 50.63±11.82, z=+2.4)",
+    "severity": 0.7961924744518912,
+    "evidence": {
+      "current": 78.86850171729107,
+      "baseline_mean": 50.6348,
+      "baseline_sd": 11.8203,
+      "z_score": 2.388577423355674
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "mood",
+    "modality": "ema",
+    "template_text": "EMA 情绪 在过去 30 天呈 下降 趋势 (起点 7.0/10 → 末点 2.7/10, r=-0.90)",
+    "severity": 0.9001830276772869,
+    "evidence": {
+      "slope": -0.19065628476084537,
+      "r": -0.9001830276772869,
+      "p": 1.284759173387492e-11
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "sleep_quality",
+    "modality": "ema",
+    "template_text": "EMA 睡眠质量 在过去 30 天呈 下降 趋势 (起点 5.7/10 → 末点 3.7/10, r=-0.81)",
+    "severity": 0.8105137514547169,
+    "evidence": {
+      "slope": -0.1229514275120504,
+      "r": -0.8105137514547169,
+      "p": 5.672321896046661e-08
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "anxiety",
+    "modality": "ema",
+    "template_text": "EMA 焦虑 在过去 30 天呈 上升 趋势 (起点 2.0/10 → 末点 6.3/10, r=0.88)",
+    "severity": 0.8779368512753658,
+    "evidence": {
+      "slope": 0.22454579162031887,
+      "r": 0.8779368512753658,
+      "p": 1.8643529844283778e-10
+    }
+  },
+  {
+    "fact_type": "trend",
+    "entity": "energy",
+    "modality": "ema",
+    "template_text": "EMA 精力 在过去 30 天呈 下降 趋势 (起点 6.3/10 → 末点 4.3/10, r=-0.87)",
+    "severity": 0.869080983504263,
+    "evidence": {
+      "slope": -0.12851316277345198,
+      "r": -0.869080983504263,
+      "p": 4.695457803410488e-10
+    }
+  },
+  {
+    "fact_type": "comparison",
+    "entity": "mmse_estimate",
+    "modality": "survey",
+    "template_text": "MMSE 由 30.0 变化至 23.0 (Δ=-7.0)",
+    "severity": 0.7,
+    "evidence": {
+      "initial": 30.0,
+      "final": 23.0,
+      "delta": -7.0
+    }
+  },
+  {
+    "fact_type": "comparison",
+    "entity": "moca_estimate",
+    "modality": "survey",
+    "template_text": "MoCA 由 26.2 变化至 20.0 (Δ=-6.2)",
+    "severity": 0.6199999999999999,
+    "evidence": {
+      "initial": 26.2,
+      "final": 20.0,
+      "delta": -6.199999999999999
+    }
+  },
+  {
+    "fact_type": "comparison",
+    "entity": "phq9",
+    "modality": "survey",
+    "template_text": "PHQ-9 抑郁分 由 0.0 变化至 6.5 (Δ=+6.5)",
+    "severity": 0.65,
+    "evidence": {
+      "initial": 0.0,
+      "final": 6.5,
+      "delta": 6.5
+    }
+  }
+]

@@ -1,0 +1,52 @@
+{
+  "_note": "Demo 模式 — 手工高质量输出, 模拟 ClinicalAgent 综合 PhysioAgent + BehaviorAgent + 量表 + Notes。",
+  "patient_id": "P01",
+  "agent": "ClinicalAgent",
+  "input": {
+    "physio_insights_count": 6,
+    "behavior_insights_count": 5,
+    "surveys_n": 5,
+    "notes_n": 1
+  },
+  "stage_inclination": "mci_to_mild_ad",
+  "stage_confidence": 0.78,
+  "differential_concern": [
+    "AD vs 路易体痴呆 (DLB): 需观察是否有视幻觉、REM 行为障碍、运动症状波动",
+    "AD vs 血管性痴呆 (VaD): 需结合既往脑血管事件史、血管性危险因素",
+    "原发抑郁 vs AD 共病抑郁: 抗抑郁治疗反应性可作鉴别参考"
+  ],
+  "intervention_priority": [
+    {
+      "type": "music_therapy",
+      "urgency": "this_week",
+      "rationale": "EMA mood 持续下降 + EDA 反应性高, 音乐疗法是 BPSD 一线非药物干预 (B 级证据)",
+      "supporting_insights": ["ins_behavior_001", "ins_physio_004"]
+    },
+    {
+      "type": "cognitive_training",
+      "urgency": "this_week",
+      "rationale": "MMSE 30→11.2 跌幅大, 但 MoCA 仅小幅下降, 提示注意力/执行功能受累, 个性化训练可减缓进展",
+      "supporting_insights": ["ins_physio_002"]
+    },
+    {
+      "type": "sleep_hygiene",
+      "urgency": "this_week",
+      "rationale": "睡眠 EMA 评分下降, 改善睡眠是 BPSD 防控基础",
+      "supporting_insights": ["ins_behavior_003"]
+    },
+    {
+      "type": "safety_monitoring",
+      "urgency": "now",
+      "rationale": "Day 24 已出现 45 分钟徘徊, 立即激活手套 GPS 追踪 + 家属预警",
+      "supporting_insights": ["ins_behavior_004"]
+    }
+  ],
+  "gold_standard_referral": "yes",
+  "referral_rationale": "MMSE 4 周内由 30 跌至 11.2 (Δ=-18.8) 速率异常, MoCA 同期仅降 1.5 提示评估工具差异; 多模态指标符合 MCI → mild_AD 转化, 强烈建议: (1) 血液 p-tau217 检测确认 AD 病理; (2) 头颅 MRI 排除其他病因; (3) 神经心理详细评估",
+  "supporting_insights": [
+    "ins_physio_001", "ins_physio_002", "ins_physio_003", "ins_physio_004",
+    "ins_behavior_001", "ins_behavior_002", "ins_behavior_004"
+  ],
+  "alert_level": "yellow",
+  "summary_chinese": "P01 患者 (68 岁男, 教育 12 年, 认知储备 0.85 中等) 30 天数据呈现典型 MCI → mild_AD 转化轨迹: 步态认知衰退 (DTC↑, MCR 阈值临近) + 自主神经退化 (HRV↓ 28%) + 情绪症状加重 (PHQ-9 1.7→9.9, EMA mood 6.3→2.0) + 已发生 2 次 BPSD 事件 (Day 24 徘徊 45 min, Day 28 激越 30 min)。综合判断: MCI 至 mild_AD 倾向 (置信度 0.78)。建议立即启动音乐疗法 + 认知训练 + 睡眠卫生干预 + GPS 安全监控, 同步转诊做 p-tau217 与 MRI 确认 AD 病理。"
+}

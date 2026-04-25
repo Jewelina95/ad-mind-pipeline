@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AD MIND Pipeline · 多模态认知监测系统</title>
+  <meta name="description" content="基于 MIND 框架的 AD 多模态监测 pipeline. Analyzer + 3 LLM Agents + Narrator. 配套 ad-synthetic-generator v2.1." />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="./" class="nav-brand">
+      <span class="nav-brand-mark">M</span>
+      AD MIND Pipeline
+    </a>
+    <div class="nav-links">
+      <a href="./" class="active">Overview</a>
+      <a href="method.html">Method</a>
+      <a href="example.html">P01 Live Demo</a>
+      <a href="https://jewelina95.github.io/ad-synthetic-generator/">Generator ↗</a>
+      <a href="https://github.com/Jewelina95/ad-mind-pipeline">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="hero-tag">v0.1 · Analyzer + 3 LLM Agents + Narrator</span>
+    <h1>从合成数据 + 真实 baseline + 专家知识<br />
+      到可解释的 AD 监测报告</h1>
+    <p class="hero-sub">
+      AD MIND Pipeline 把 <a href="https://jewelina95.github.io/ad-synthetic-generator/">ad-synthetic-generator</a> 输出的 30 天多模态轨迹
+      ，通过 <strong>Analyzer (统计) + 3 LLM Agent (Physio/Behavior/Clinical) + Narrator</strong> 的链路，转化为带可追溯推理链的临床报告。
+      所有判断都引用具体 fact_id 和 knowledge_id，可反查到原始数值与文献。
+    </p>
+
+    <!-- KEY STATS -->
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num">5<small> patients</small></div>
+        <div class="stat-label">虚拟 AD 患者已跑通</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">34<small> facts</small></div>
+        <div class="stat-label">P01 Analyzer 输出</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">15<small> insights</small></div>
+        <div class="stat-label">3 Agent 综合产出</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">35<small> KB</small></div>
+        <div class="stat-label">专家知识 JSON 条目</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section">
+  <div class="container">
+    <div class="eyebrow">System Architecture</div>
+    <h2 class="section-title">三股流, 一份报告</h2>
+    <p class="section-sub">
+      合成或真实多模态数据 + 真实健康 baseline + 文献/采访固化的专家知识库, 经过 Analyzer 统计提取 fact、3 个 LLM Agent 解读、Narrator 抛光叙事, 最终生成医生可追溯的临床报告。
+    </p>
+
+    <div class="arch">
+      <div class="arch-col">
+        <div class="arch-box">
+          <strong>合成 / 真实数据</strong>
+          <small>30 天 sensor + EMA + 量表 + Notes (来自 generator v2.1)</small>
+        </div>
+        <div class="arch-box">
+          <strong>真实健康 baseline</strong>
+          <small>4 受试者 12 任务参考范围, 用作 z-score 标尺</small>
+        </div>
+        <div class="arch-box">
+          <strong>专家知识 + 文献</strong>
+          <small>35 条 JSON, 含 BPSD/分期/传感器阈值/文献证据</small>
+        </div>
+      </div>
+      <div class="arch-arrow">&rarr;</div>
+      <div>
+        <div class="arch-core">
+          <div class="arch-core-title">AD MIND Pipeline</div>
+          <div class="arch-core-sub">Analyzer · 3 Agents · Narrator</div>
+        </div>
+      </div>
+      <div class="arch-arrow">&rarr;</div>
+      <div class="arch-col">
+        <div class="arch-out">
+          <strong>fact[] (Analyzer)</strong>
+          <small>34 条 outlier/trend/comparison/dtc/extreme</small>
+        </div>
+        <div class="arch-out">
+          <strong>insight[] (3 Agents)</strong>
+          <small>15 条 Physio + Behavior + Clinical 综合洞察</small>
+        </div>
+        <div class="arch-out">
+          <strong>Dashboard + 报告</strong>
+          <small>医生版 .md + 家属版 + 4 张证据卡 + 图表</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW STEPS -->
+<section class="section-tight">
+  <div class="container">
+    <div class="eyebrow">Pipeline Steps</div>
+    <h2 class="section-title">四层每层做什么</h2>
+
+    <div class="grid-4">
+      <div class="card">
+        <div class="card-icon">&#9678;</div>
+        <h3>1. Analyzer</h3>
+        <p>纯统计 + 模板, 不调 LLM。z-score 偏离、30 天趋势、双任务代价、量表对比、跨模态签名 → 输出结构化 <code>DataFact[]</code>。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#9650;</div>
+        <h3>2. KnowledgeStore</h3>
+        <p>按 fact 的 modality/tags/severity 路由检索 35 条 JSON 知识。每条带 evidence level + PMID。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#10070;</div>
+        <h3>3. 3 LLM Agents</h3>
+        <p>Physio (传感器) + Behavior (BPSD/EMA) + Clinical (综合) 各一次 sonnet-4 调用。每条 insight 必须引用 fact_id + knowledge_id。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#9733;</div>
+        <h3>4. Narrator</h3>
+        <p>Threader 按 alert 等级排序 + Insight Card 两段式渲染 + Chart Spec → 医生版报告 + 家属版简报。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="section">
+  <div class="container">
+    <div class="eyebrow">Design Principles</div>
+    <h2 class="section-title">为什么这样切分</h2>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>LLM 不算数</h3>
+        <p>所有定量计算 (z-score / DTC / 趋势斜率) 由 Analyzer 用 numpy 算, 喂给 Agent 的是"已计算好的事实"而非原始 CSV。这能彻底规避 LLM 算错数字。</p>
+      </div>
+      <div class="card">
+        <h3>知识检索由数据驱动</h3>
+        <p>不是 Agent 自己想查什么就查什么, 而是 fact 的 tags 自动决定查什么知识, 确保事实和知识必然配对, 杜绝知识"空引用"。</p>
+      </div>
+      <div class="card">
+        <h3>可追溯</h3>
+        <p>每条 insight 必须列出依据的 fact_id + knowledge_id, 医生看到结论可反查到原始数据 + 文献。这是临床落地的硬性要求。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LINKS -->
+<section class="section-tight">
+  <div class="container">
+    <div class="eyebrow">Explore</div>
+    <h2 class="section-title">深入了解</h2>
+    <div class="grid-3">
+      <a class="card link-card" href="method.html">
+        <h3>Method &rarr;</h3>
+        <p>4 层架构每层的输入 / 输出 / 代码 / prompt 详解</p>
+      </a>
+      <a class="card link-card" href="example.html">
+        <h3>P01 Live Demo &rarr;</h3>
+        <p>真实跑通的 P01 患者完整 pipeline 输出 + 可视化</p>
+      </a>
+      <a class="card link-card" href="https://jewelina95.github.io/ad-synthetic-generator/">
+        <h3>姊妹站: Generator &#8599;</h3>
+        <p>本 pipeline 的数据来源 — 5 模态 30 天合成数据生成器 v2.1</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>AD MIND Pipeline · 配套 <a href="https://jewelina95.github.io/ad-synthetic-generator/">ad-synthetic-generator</a> · MIT License</p>
+    <p style="opacity:0.5;font-size:0.85em">
+      基于 MIND 框架 (Zou 2026), 扩展为多模态可穿戴 AD 监测 + MDT 多 Agent 解读.
+      35 条知识库源自 Buracchio 2010 / Verghese 2013 / Iaboni 2022 / Khachiyants 2011 等核心文献.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

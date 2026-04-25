@@ -1,0 +1,69 @@
+{
+  "_note": "Demo 模式 — 手工高质量输出，模拟 PhysioAgent (Claude sonnet-4) 在拿到 27 条 fact + 知识库后的产出。设置 ANTHROPIC_API_KEY 后跑 03_physio_agent.py P01 即可获得真 LLM 输出。",
+  "patient_id": "P01",
+  "agent": "PhysioAgent",
+  "input_facts_count": 27,
+  "kb_entries_used": 8,
+  "insights": [
+    {
+      "id": "ins_physio_001",
+      "observation": "步速 30 天持续下降, 跌至 0.78 m/s",
+      "clinical_implication": "符合 Buracchio 2010 描述的 AD 前驱期步速拐点, 海马-前额叶环路早期受累",
+      "domain": "biological",
+      "supporting_facts": ["F03_walking_normal_speed_trend", "F05_walking_normal_speed_outlier"],
+      "supporting_knowledge": ["SENSOR_IMU_001", "NORM_GAIT_001"],
+      "confidence": 0.88,
+      "differential": "需鉴别 PD (静止性震颤?) 与年龄相关性步态改变"
+    },
+    {
+      "id": "ins_physio_002",
+      "observation": "双任务步态变异性升至 8.5% (基线 2.3%)",
+      "clinical_implication": "双任务代价显著, 提示前额叶-运动整合受损, 符合 MCR 综合征预诊断标准",
+      "domain": "biological",
+      "supporting_facts": ["F09_walking_dual_task_stride_var", "F11_walking_dual_task_dtc"],
+      "supporting_knowledge": ["MCR_CRITERIA_001", "SENSOR_IMU_002"],
+      "confidence": 0.85,
+      "differential": ""
+    },
+    {
+      "id": "ins_physio_003",
+      "observation": "HRV (RMSSD) 30 天下降 28%",
+      "clinical_implication": "副交感神经活动减退, 与 AD 早期自主神经功能退化一致 (Collins 2012)",
+      "domain": "biological",
+      "supporting_facts": ["F18_balance_standing_hrv_trend", "F25_hand_fine_motor_hr_trend"],
+      "supporting_knowledge": ["SENSOR_PPG_002"],
+      "confidence": 0.79,
+      "differential": "需鉴别心血管疾病或降压药物影响"
+    },
+    {
+      "id": "ins_physio_004",
+      "observation": "EDA 变异性单点峰值 z=+9.6, 远超阈值",
+      "clinical_implication": "极端 EDA 反应性提示日内激越发作, 与第 24/28 天 BPSD 事件吻合",
+      "domain": "biological",
+      "supporting_facts": ["F27_hand_fine_motor_eda_var_outlier"],
+      "supporting_knowledge": ["SENSOR_EDA_002", "BPSD_AGITATION_001"],
+      "confidence": 0.83,
+      "differential": "需鉴别环境刺激/疼痛触发"
+    },
+    {
+      "id": "ins_physio_005",
+      "observation": "平衡站立 SVM 变异 30 天上升 +0.51 (r=0.44)",
+      "clinical_implication": "静态平衡控制能力渐进性下降, 跌倒风险升高, 建议 Tinetti 平衡量表评估",
+      "domain": "biological",
+      "supporting_facts": ["F15_balance_standing_svm_trend"],
+      "supporting_knowledge": ["SENSOR_IMU_003"],
+      "confidence": 0.72,
+      "differential": ""
+    },
+    {
+      "id": "ins_physio_006",
+      "observation": "EDA 基线 30 天下降 17% (1913 → 1596)",
+      "clinical_implication": "皮肤交感神经基础张力下降, 提示胆碱能系统功能减退",
+      "domain": "biological",
+      "supporting_facts": ["F26_hand_fine_motor_eda_baseline_trend"],
+      "supporting_knowledge": ["SENSOR_EDA_001"],
+      "confidence": 0.65,
+      "differential": "脱水/抗胆碱药物使用?"
+    }
+  ]
+}

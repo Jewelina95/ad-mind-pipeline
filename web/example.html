@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P01 Live Demo · AD MIND Pipeline</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="./" class="nav-brand">
+      <span class="nav-brand-mark">M</span>
+      AD MIND Pipeline
+    </a>
+    <div class="nav-links">
+      <a href="./">Overview</a>
+      <a href="method.html">Method</a>
+      <a href="example.html" class="active">P01 Live Demo</a>
+      <a href="https://jewelina95.github.io/ad-synthetic-generator/">Generator ↗</a>
+      <a href="https://github.com/Jewelina95/ad-mind-pipeline">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" style="padding: 80px 0 30px;">
+  <div class="container">
+    <span class="hero-tag">Patient P01 · Day 0 → Day 30 · Live test result</span>
+    <h1>P01 患者全 pipeline 跑通结果</h1>
+    <p class="hero-sub">
+      P01: 68 岁男性, 教育 12 年, 进展模式 linear, 认知储备 0.85 (中等)。生成器跑了 30 天数据,
+      Analyzer 抽出 34 条 fact, 3 个 Agent 综合输出 15 条 insight, Narrator 生成医生 + 家属双版本报告。
+      <strong style="color:var(--accent-warm)">总评: 🟡 MCI → mild_AD 倾向 (置信度 0.78)</strong>
+    </p>
+  </div>
+</section>
+
+<!-- Trajectory chart -->
+<section class="section-tight">
+  <div class="container">
+    <div class="eyebrow">Step 0 · Generator output</div>
+    <h2 class="section-title">30 天纵向轨迹</h2>
+    <p class="section-sub">progression 变量 [0,1] 驱动所有模态。下图显示 P01 的 effective_progression 与 surveys (MMSE/MoCA/PHQ-9) 同步退化。</p>
+    <div id="chart_progression" style="width:100%;height:400px"></div>
+  </div>
+</section>
+
+<!-- Step 1: Analyzer -->
+<section class="section-tight">
+  <div class="container">
+    <div class="layer-section">
+      <div class="layer-tag">Step 1 · Analyzer (无 LLM)</div>
+      <h3>34 条 DataFact (Top 8 按 severity 排序)</h3>
+      <p>由 numpy + scipy.stats.linregress 算出, 完全确定性。</p>
+
+      <div class="fact-card red">
+        <div class="fact-meta">F32 · comparison · survey · severity 1.00</div>
+        <div class="fact-text">MMSE 由 30.0 变化至 11.2 (Δ=-18.8) — 4 周内速率异常</div>
+      </div>
+      <div class="fact-card red">
+        <div class="fact-meta">F27 · outlier · eda · severity 1.00 · z=+9.6</div>
+        <div class="fact-text">[hand_fine_motor] EDA 变异异常升高至 163.52 (基线 50.63±11.82)</div>
+      </div>
+      <div class="fact-card red">
+        <div class="fact-meta">F26 · trend · eda · severity 0.95 · r=-0.95 p<0.001</div>
+        <div class="fact-text">[hand_fine_motor] EDA 基线 30 天下降趋势 (1912.68 → 1596.43)</div>
+      </div>
+      <div class="fact-card yellow">
+        <div class="fact-meta">F30 · trend · ema · severity 0.93 · r=+0.93</div>
+        <div class="fact-text">EMA 焦虑 30 天上升趋势 (起点 1.7/10 → 末点 6.0/10)</div>
+      </div>
+      <div class="fact-card yellow">
+        <div class="fact-meta">F28 · trend · ema · severity 0.91 · r=-0.91</div>
+        <div class="fact-text">EMA 情绪 30 天下降趋势 (起点 6.3/10 → 末点 2.0/10)</div>
+      </div>
+      <div class="fact-card yellow">
+        <div class="fact-meta">F31 · trend · ema · severity 0.83 · r=-0.83</div>
+        <div class="fact-text">EMA 精力 30 天下降趋势 (起点 6.7/10 → 末点 4.7/10)</div>
+      </div>
+      <div class="fact-card yellow">
+        <div class="fact-meta">F34 · comparison · survey · severity 0.82</div>
+        <div class="fact-text">PHQ-9 抑郁分由 1.7 变化至 9.9 (Δ=+8.2) — mild → moderate 抑郁</div>
+      </div>
+      <div class="fact-card yellow">
+        <div class="fact-meta">F25 · trend · ppg · severity 0.77 · r=+0.77 p<0.001</div>
+        <div class="fact-text">[hand_fine_motor] HR 均值 30 天上升趋势 (67.00 → 69.47)</div>
+      </div>
+
+      <p style="margin-top:14px;font-size:0.85rem;color:var(--text-faint)">
+        完整 34 条 fact: <a href="data/facts.json" target="_blank">facts.json</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Step 2: Knowledge -->
+<section class="section-tight">
+  <div class="container">
+    <div class="layer-section">
+      <div class="layer-tag">Step 2 · KnowledgeStore</div>
+      <h3>Router 路由检索 8 条相关知识</h3>
+      <p style="font-size:0.88rem">基于 fact 的 modality (imu/ppg/eda/ema/survey) 和 pattern (BPSD signature) 自动路由, 不全量推送。</p>
+
+      <pre><code>检索到的 8 条:
+  SENSOR_IMU_001    步速 AD 标志物 (Buracchio 2010, A 级)
+  SENSOR_IMU_002    双任务步态代价 (Montero-Odasso 2019, A 级)
+  SENSOR_PPG_002    HRV 与 AD 关联 (Collins 2012, B 级)
+  SENSOR_EDA_001    EDA 基线下降 (Iaboni 2022, B 级)
+  SENSOR_EDA_002    EDA 反应性激越签名 (Iaboni 2022, B 级)
+  BPSD_DEPRESSION_001  AD 共病抑郁 (患病率 30-50%)
+  BPSD_ANXIETY_001     BPSD 焦虑亚型
+  MCR_CRITERIA_001  MCR 综合征诊断 (Verghese 2013, A 级)</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Step 3: Agents -->
+<section class="section-tight">
+  <div class="container">
+    <div class="layer-section">
+      <div class="layer-tag">Step 3 · 3 LLM Agents</div>
+      <h3>15 条 Insight (Physio 6 + Behavior 5 + Clinical 1 + 综合)</h3>
+
+      <div class="tab-bar">
+        <button class="active" onclick="showTab(event,'tab_physio')">PhysioAgent (6)</button>
+        <button onclick="showTab(event,'tab_behavior')">BehaviorAgent (5)</button>
+        <button onclick="showTab(event,'tab_clinical')">ClinicalAgent (综合)</button>
+      </div>
+
+      <div id="tab_physio" class="tab-content active">
+        <div class="insight-card yellow">
+          <div class="ins-meta">ins_physio_001 · biological · 置信度 0.88 · 🟡 yellow</div>
+          <div class="ins-text">步速 30 天持续下降, 跌至 0.78 m/s</div>
+          <div class="ins-impl">符合 Buracchio 2010 描述的 AD 前驱期步速拐点, 海马-前额叶环路早期受累</div>
+          <div class="ins-refs">→ supporting_facts: F03, F05 · supporting_knowledge: SENSOR_IMU_001, NORM_GAIT_001<br>→ differential: 需鉴别 PD (静止性震颤?) 与年龄相关性步态改变</div>
+        </div>
+
+        <div class="insight-card yellow">
+          <div class="ins-meta">ins_physio_002 · biological · 置信度 0.85 · 🟡 yellow</div>
+          <div class="ins-text">双任务步态变异性升至 8.5% (基线 2.3%)</div>
+          <div class="ins-impl">双任务代价显著, 提示前额叶-运动整合受损, 符合 MCR 综合征预诊断标准</div>
+          <div class="ins-refs">→ supporting_facts: F09, F11 · supporting_knowledge: MCR_CRITERIA_001, SENSOR_IMU_002</div>
+        </div>
+
+        <div class="insight-card yellow">
+          <div class="ins-meta">ins_physio_003 · biological · 置信度 0.79 · 🟡 yellow</div>
+          <div class="ins-text">HRV (RMSSD) 30 天下降 28%</div>
+          <div class="ins-impl">副交感神经活动减退, 与 AD 早期自主神经功能退化一致 (Collins 2012)</div>
+          <div class="ins-refs">→ supporting_facts: F18, F25 · supporting_knowledge: SENSOR_PPG_002<br>→ differential: 需鉴别心血管疾病或降压药物影响</div>
+        </div>
+
+        <div class="insight-card yellow">
+          <div class="ins-meta">ins_physio_004 · biological · 置信度 0.83 · 🟡 yellow</div>
+          <div class="ins-text">EDA 变异性单点峰值 z=+9.6, 远超阈值</div>
+          <div class="ins-impl">极端 EDA 反应性提示日内激越发作, 与第 24/28 天 BPSD 事件吻合</div>
+          <div class="ins-refs">→ supporting_facts: F27 · supporting_knowledge: SENSOR_EDA_002, BPSD_AGITATION_001</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="ins-meta">ins_physio_005 · biological · 置信度 0.72</div>
+          <div class="ins-text">平衡站立 SVM 变异 30 天上升 +0.51 (r=0.44)</div>
+          <div class="ins-impl">静态平衡控制能力渐进性下降, 跌倒风险升高, 建议 Tinetti 平衡量表评估</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="ins-meta">ins_physio_006 · biological · 置信度 0.65</div>
+          <div class="ins-text">EDA 基线 30 天下降 17% (1913 → 1596)</div>
+          <div class="ins-impl">皮肤交感神经基础张力下降, 提示胆碱能系统功能减退</div>
+        </div>
+      </div>
+
+      <div id="tab_behavior" class="tab-content">
+        <div class="insight-card yellow">
+          <div class="ins-meta">ins_behavior_001 · psychological · 置信度 0.85 · 🟡 yellow</div>
+          <div class="ins-text">EMA 情绪 30 天单调下降 (6.3 → 2.0/10)</div>
+          <div class="ins-impl">持续性情绪低落, 符合 AD 共病抑郁的典型曲线 (患病率 30-50%)</div>
+          <div class="ins-refs">→ supporting_facts: F28 · supporting_knowledge: BPSD_DEPRESSION_001<br>→ differential: 原发抑郁 vs AD 共病抑郁; PHQ-9 同步上升 (1.7→9.9) 强化共病可能</div>
+        </div>
+
+        <div class="insight-card yellow">
+          <div class="ins-meta">ins_behavior_002 · psychological · 置信度 0.82 · 🟡 yellow</div>
+          <div class="ins-text">EMA 焦虑 30 天上升 (1.7 → 6.0/10, r=+0.93)</div>
+          <div class="ins-impl">焦虑症状加重与 BPSD 焦虑亚型一致, 是激越发作的前驱症状</div>
+          <div class="ins-refs">→ supporting_facts: F30 · supporting_knowledge: BPSD_ANXIETY_001</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="ins-meta">ins_behavior_003 · behavioral · 置信度 0.76</div>
+          <div class="ins-text">睡眠质量 EMA 评分下降 36%</div>
+          <div class="ins-impl">睡眠紊乱在 AD 中患病率 82%, 需评估昼夜节律 (褪黑素分泌)</div>
+        </div>
+
+        <div class="insight-card red">
+          <div class="ins-meta">ins_behavior_004 · behavioral · 置信度 0.91 · 🔴 red</div>
+          <div class="ins-text">Day 24 出现 45 分钟徘徊事件, Day 28 出现 30 分钟激越事件</div>
+          <div class="ins-impl">BPSD 事件已成模式, 需立即启动非药物干预防止恶化</div>
+          <div class="ins-refs">→ supporting_facts: bpsd_events.jsonl · supporting_knowledge: BPSD_WANDERING_001, BPSD_AGITATION_001</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="ins-meta">ins_behavior_005 · behavioral · 置信度 0.74</div>
+          <div class="ins-text">EMA 精力下降 30% 伴 hand_fine_motor 活动量上升</div>
+          <div class="ins-impl">主观精力降但客观重复性手部动作增加, 提示无目的运动 (烦躁标志)</div>
+        </div>
+      </div>
+
+      <div id="tab_clinical" class="tab-content">
+        <div class="insight-card yellow" style="border-left-width:5px">
+          <div class="ins-meta">ins_clinical_overall · 置信度 0.78 · 🟡 yellow</div>
+          <div class="ins-text" style="font-size:1.05rem">分期倾向: <strong style="color:var(--accent)">MCI → mild_AD 转化轨迹</strong></div>
+          <div class="ins-impl" style="margin-top:12px">
+            P01 患者 30 天数据呈现典型 MCI → mild_AD 转化轨迹:
+            <br>① 步态认知衰退 (DTC↑, MCR 阈值临近)
+            <br>② 自主神经退化 (HRV↓ 28%)
+            <br>③ 情绪症状加重 (PHQ-9 1.7→9.9, EMA mood 6.3→2.0)
+            <br>④ 已发生 2 次 BPSD 事件 (Day 24 徘徊 45 min, Day 28 激越 30 min)
+          </div>
+          <div class="ins-refs" style="margin-top:14px">
+            <strong>鉴别诊断关注</strong>:
+            <ul style="margin:6px 0 0 0;padding-left:20px">
+              <li>AD vs 路易体痴呆 (DLB): 视幻觉 / REM 行为障碍?</li>
+              <li>AD vs 血管性痴呆 (VaD): 既往脑血管事件?</li>
+              <li>原发抑郁 vs AD 共病抑郁: 抗抑郁治疗反应性</li>
+            </ul>
+          </div>
+          <div class="ins-refs" style="margin-top:12px">
+            <strong>转诊建议</strong>: <span class="alert-pill yellow">YES</span>
+            <ul style="margin:6px 0 0 0;padding-left:20px">
+              <li>血液 <strong>p-tau217</strong> 检测确认 AD 病理</li>
+              <li>头颅 <strong>MRI</strong> 排除血管性病变</li>
+              <li>神经心理详细评估</li>
+            </ul>
+          </div>
+          <div class="ins-refs" style="margin-top:12px">
+            <strong>干预优先级</strong>:
+            <ul style="margin:6px 0 0 0;padding-left:20px">
+              <li>🔴 立即: <strong>安全监控</strong> (GPS + 家属预警) — Day 24 已出现 45 min 徘徊</li>
+              <li>本周: <strong>音乐疗法</strong> (B 级证据) — EMA mood ↓ + EDA 反应性高</li>
+              <li>本周: <strong>认知训练</strong> — MMSE 大幅下降</li>
+              <li>本周: <strong>睡眠卫生</strong> — EMA 睡眠 ↓</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:14px;font-size:0.85rem;color:var(--text-faint)">
+        完整 JSON: <a href="data/insights_physio.json" target="_blank">insights_physio</a> ·
+        <a href="data/insights_behavior.json" target="_blank">insights_behavior</a> ·
+        <a href="data/insights_clinical.json" target="_blank">insights_clinical</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Step 4: Narrator -->
+<section class="section-tight">
+  <div class="container">
+    <div class="layer-section">
+      <div class="layer-tag">Step 4 · Narrator</div>
+      <h3>最终医生版报告 4 张证据卡</h3>
+
+      <div class="grid-2">
+        <div class="insight-card yellow">
+          <div class="ins-meta">卡 1 · 认知-步态联合退化 · 🟡</div>
+          <div class="ins-text"><strong>步速 30 天持续下降至 0.78 m/s</strong> (基线 1.05), 双任务变异性升至 8.5%。</div>
+          <div class="ins-impl">符合 Buracchio 2010 AD 前驱期步速拐点 + Verghese 2013 MCR 标准</div>
+        </div>
+
+        <div class="insight-card yellow">
+          <div class="ins-meta">卡 2 · 情绪-自主神经协同恶化 · 🟡</div>
+          <div class="ins-text"><strong>PHQ-9 1.7 → 9.9 + EMA 6.3 → 2.0</strong>, HRV ↓28%, EDA 峰值 z=+9.6</div>
+          <div class="ins-impl">三模态同向恶化, AD 共病抑郁 + BPSD 焦虑前驱</div>
+        </div>
+
+        <div class="insight-card red">
+          <div class="ins-meta">卡 3 · BPSD 事件已成模式 · 🔴</div>
+          <div class="ins-text">Day 24 徘徊 45 min + Day 28 激越 30 min, 均在午后</div>
+          <div class="ins-impl">立即启动非药物干预 + 激活 GPS 追踪</div>
+        </div>
+
+        <div class="insight-card yellow">
+          <div class="ins-meta">卡 4 · ClinicalAgent 综合判断 · 🟡</div>
+          <div class="ins-text"><strong>MCI → mild_AD 倾向 (置信度 0.78)</strong></div>
+          <div class="ins-impl">建议: p-tau217 + MRI + 多维干预</div>
+        </div>
+      </div>
+
+      <p style="margin-top:18px;font-size:0.88rem">
+        完整报告: <a href="data/report.md" target="_blank">report.md</a> · Dashboard JSON: <a href="data/dashboard.json" target="_blank">dashboard.json</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Trace -->
+<section class="section-tight">
+  <div class="container">
+    <div class="layer-section">
+      <div class="layer-tag">Traceability · 关键设计</div>
+      <h3>从结论反查到原始数据 + 文献</h3>
+      <p>每条 insight 都引用了具体 fact_id 和 knowledge_id。医生看到任意结论可以反查。</p>
+
+      <pre><code>例: ins_physio_001 "步速 30 天持续下降, 跌至 0.78 m/s"
+└── 来自 fact: F03 (Analyzer trend 检测) + F05 (outlier 检测)
+    └── 来源: data_v2/P01/sensor/walking_normal_dayXX.csv (30 天)
+└── 引用知识: SENSOR_IMU_001 + NORM_GAIT_001
+    └── 文献: Buracchio 2010 (PMID:20505129, A 级证据)
+              Verghese 2013 (PMID:23744386, A 级证据)
+└── 置信度: 0.88
+    └── 因 trend r=-0.91 强 + 知识 A 级证据 + 模式经典</code></pre>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>全部 P01 输出 JSON: <a href="data/">/data/</a></p>
+    <p>跑你自己的患者: <code>cd demo && python3 07_run_all.py P02</code></p>
+  </div>
+</footer>
+
+<script>
+function showTab(evt, tabId) {
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  evt.currentTarget.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// Plot progression chart with surveys overlay
+const surveys = [
+  {day:0, mmse:30.0, moca:22.9, phq9:1.7},
+  {day:7, mmse:29.8, moca:26.1, phq9:5.7},
+  {day:14, mmse:25.3, moca:24.5, phq9:6.5},
+  {day:21, mmse:24.8, moca:22.5, phq9:9.0},
+  {day:28, mmse:11.2, moca:21.4, phq9:9.9}
+];
+
+// fetch progression CSV
+fetch('data/progression.csv').then(r => r.text()).then(text => {
+  const lines = text.trim().split('\n').slice(1);
+  const days = [], progs = [];
+  for (const line of lines) {
+    const [d, _, e] = line.split(',');
+    days.push(parseInt(d));
+    progs.push(parseFloat(e));
+  }
+
+  const traces = [
+    {x: days, y: progs, type:'scatter', mode:'lines', name:'progression',
+     line: {color:'#5EEAD4', width:3}, yaxis:'y'},
+    {x: surveys.map(s=>s.day), y: surveys.map(s=>s.mmse), type:'scatter',
+     mode:'lines+markers', name:'MMSE', line: {color:'#38BDF8'},
+     marker:{size:10}, yaxis:'y2'},
+    {x: surveys.map(s=>s.day), y: surveys.map(s=>s.moca), type:'scatter',
+     mode:'lines+markers', name:'MoCA', line: {color:'#22C55E'},
+     marker:{size:10}, yaxis:'y2'},
+    {x: surveys.map(s=>s.day), y: surveys.map(s=>s.phq9), type:'scatter',
+     mode:'lines+markers', name:'PHQ-9', line: {color:'#F472B6'},
+     marker:{size:10}, yaxis:'y3'},
+    // BPSD events
+    {x: [24,28], y: [1.0,1.0], type:'scatter', mode:'markers',
+     name:'BPSD events', marker: {color:'#EF4444', size:18, symbol:'star'},
+     yaxis:'y'}
+  ];
+
+  const layout = {
+    paper_bgcolor: '#0B0F14',
+    plot_bgcolor: '#0B0F14',
+    font: {color: '#E6EDF3', family:'-apple-system,sans-serif'},
+    xaxis: {title: 'Day', gridcolor: '#1B232E', linecolor:'#243043'},
+    yaxis: {title: 'progression [0,1]', side:'left', gridcolor:'#1B232E',
+            range:[0,1.1], tickfont:{color:'#5EEAD4'}, titlefont:{color:'#5EEAD4'}},
+    yaxis2: {title: 'MMSE / MoCA (0-30)', overlaying:'y', side:'right',
+             range:[0,32], tickfont:{color:'#38BDF8'}, titlefont:{color:'#38BDF8'}},
+    yaxis3: {title: 'PHQ-9', overlaying:'y', side:'right', position:1.0, anchor:'free',
+             range:[0,15], tickfont:{color:'#F472B6'}, titlefont:{color:'#F472B6'}},
+    legend: {orientation:'h', y:-0.2},
+    margin: {l:60, r:60, t:30, b:60},
+    annotations: [
+      {x:24, y:1.05, text:'wandering 45min', showarrow:true, arrowcolor:'#EF4444',
+       font:{color:'#EF4444',size:11}, ax:0, ay:-30, yref:'y'},
+      {x:28, y:1.05, text:'agitation 30min', showarrow:true, arrowcolor:'#EF4444',
+       font:{color:'#EF4444',size:11}, ax:0, ay:-50, yref:'y'},
+    ],
+  };
+
+  Plotly.newPlot('chart_progression', traces, layout, {responsive:true});
+});
+</script>
+
+</body>
+</html>
