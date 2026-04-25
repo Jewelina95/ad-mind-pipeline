@@ -44,7 +44,7 @@ real baseline                         ↑文献 + 采访固化
 
 ```
 .
-├── web/                              # GitHub Pages 公开站点
+├── docs/                              # GitHub Pages 公开站点
 │   ├── index.html                    # 项目主页
 │   ├── method.html                   # 4 层架构详解
 │   ├── example.html                  # P01 真实测试结果
